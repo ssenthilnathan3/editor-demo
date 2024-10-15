@@ -1,11 +1,11 @@
-import React from 'react';
+// // import React from 'react';
 
-const Hello = () => {
-  return (
-    <>
-      <h1>Hello Hello</h1>
-    </>
-  );
-};
+// const Hello = () => {
+//   return (
+//     <>
+//       <h1>Hello Hello</h1>
+//     </>
+//   );
+// };
 
-export default Hello;
+// export default Hello;
