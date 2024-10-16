@@ -24,9 +24,10 @@ import RichTextEditor, {
   HorizontalRule,
   Iframe,
   Image,
-  // ImageGif,
+  ImageGif,
   ImageUpload,
   ImportWord,
+  Import,
   Indent,
   Italic,
   Katex,
@@ -43,13 +44,17 @@ import RichTextEditor, {
   TaskList,
   TextAlign,
   TextDirection,
+  TrackChange,
   Underline,
   Video,
   VideoUpload,
   locale,
-} from '@ailaysa/global-editor'
+  PaginationExtension,
+  PageNode,
+} from 'global-editor'
 
-import "@ailaysa/global-editor/style.css";
+import 'global-editor/style.css'
+import { Extension } from '@tiptap/core'
 
 function convertBase64ToBlob(base64: string) {
   const arr = base64.split(',')
@@ -72,6 +77,7 @@ const extensions = [
       limit: 50_000,
     },
   }),
+  TrackChange,
   History,
   SearchAndReplace,
   TableOfContents,
@@ -136,14 +142,22 @@ const extensions = [
   Iframe,
   ExportPdf.configure({ spacer: true }),
   ImportWord.configure({
-    upload: (files: File[]) => {
+    upload: async (files: File[]) => {
+      console.log("Upload function called with files:", files.length);
       const f = files.map(file => ({
         src: URL.createObjectURL(file),
         alt: file.name,
-      }))
-      return Promise.resolve(f)
+      }));
+      console.log("Processed files:", f);
+      return f;
     },
   }),
+  Import.configure({
+    appId: 'ok082489',
+    token: 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE3MjkxMTQyOTMsIm5iZiI6MTcyOTExNDI5MywiZXhwIjoxNzI5MjAwNjkzLCJpc3MiOiJodHRwczovL2Nsb3VkLnRpcHRhcC5kZXYiLCJhdWQiOiI2ODc3YzA3NS05MjlkLTRiMDMtYTVjYS05ZTVlM2NmOTZkOGYifQ.0KIkH9VkSEbXEn9G0vWVBiCtFqDYD1Z5UnMq_E-RzFQ'
+  }),
+  PaginationExtension,
+  PageNode,
   ExportWord,
   Excalidraw,
   TextDirection,
@@ -164,7 +178,7 @@ const extensions = [
   }),
 ]
 
-const DEFAULT = `<h1 style="text-align: center">Editor</h1><p>A modern editor based on <a target="_blank" rel="noopener noreferrer nofollow" class="link" href="https://github.com/scrumpy/tiptap">tiptap</a> and <a target="_blank" rel="noopener noreferrer nofollow" class="link" href="https://ui.shadcn.com/">shadcn ui</a> for Reactjs</p><p></p><p style="text-align: center"></p><div style="text-align: center;" class="image"><img height="auto" src="https://picsum.photos/1920/1080.webp?t=1" align="center" width="500"></div><p></p><div data-type="horizontalRule"><hr></div><h2>Demo</h2><p>👉<a target="_blank" rel="noopener noreferrer nofollow" class="link" href="https://global-editor.vercel.app/">Demo</a></p><h2>Features</h2><ul><li><p>Use <a target="_blank" rel="noopener noreferrer nofollow" class="link" href="https://ui.shadcn.com/">shadcn ui</a> components</p></li><li><p>Markdown support</p></li><li><p>TypeScript support</p></li><li><p>I18n support (vi, en, zh, pt)</p></li><li><p>React support</p></li><li><p>Slash Commands</p></li><li><p>Multi Column</p></li><li><p>TailwindCss</p></li><li><p>Support emoji</p></li><li><p>Support iframe</p></li></ul><h2>Installation</h2><pre><code class="language-bash">pnpm add global-editor</code></pre><p></p>`
+const DEFAULT = `<h1 style="text-align: center">Rich Text Editor</h1><p>A modern WYSIWYG rich text editor based on <a target="_blank" rel="noopener noreferrer nofollow" class="link" href="https://github.com/scrumpy/tiptap">tiptap</a> and <a target="_blank" rel="noopener noreferrer nofollow" class="link" href="https://ui.shadcn.com/">shadcn ui</a> for Reactjs</p><p></p><p style="text-align: center"></p><div style="text-align: center;" class="image"><img height="auto" src="https://picsum.photos/1920/1080.webp?t=1" align="center" width="500"></div><p></p><div data-type="horizontalRule"><hr></div><h2>Demo</h2><p>👉<a target="_blank" rel="noopener noreferrer nofollow" class="link" href="https://global-editor.vercel.app/">Demo</a></p><h2>Features</h2><ul><li><p>Use <a target="_blank" rel="noopener noreferrer nofollow" class="link" href="https://ui.shadcn.com/">shadcn ui</a> components</p></li><li><p>Markdown support</p></li><li><p>TypeScript support</p></li><li><p>I18n support (vi, en, zh, pt)</p></li><li><p>React support</p></li><li><p>Slash Commands</p></li><li><p>Multi Column</p></li><li><p>TailwindCss</p></li><li><p>Support emoji</p></li><li><p>Support iframe</p></li></ul><h2>Installation</h2><pre><code class="language-bash">pnpm add global-editor</code></pre><p></p>`
 
 function debounce(func: any, wait: number) {
   let timeout: NodeJS.Timeout
@@ -198,7 +212,6 @@ function App() {
         style={{
           display: 'flex',
           gap: '12px',
-          marginTop: '100px',
           marginBottom: 10,
         }}
       >
